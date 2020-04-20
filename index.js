@@ -322,6 +322,14 @@ function readElmJson(repoPath) {
   if (fs.existsSync(gitDepsPath)) {
     const gitDeps = fs.readFileSync(gitDepsPath, { encoding: 'utf-8' });
     gitDepsJson = JSON.parse(gitDeps);
+    const direct = gitDepsJson['git-dependencies'].direct;
+    for (const [k, v] of Object.entries(direct)) {
+      const gitHubShorthand = k.match(/^[\w\d]+(?:-[\w\d]+)*\/[\w\d]+(?:-[\w\d]+)*$/i);
+      if (Array.isArray(gitHubShorthand)) {
+        delete direct[k];
+        direct['https://github.com/' + gitHubShorthand[0] + '.git'] = v;
+      }
+    }
   }
 
   return Object.assign(elmFileJson, gitDepsJson);
